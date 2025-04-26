@@ -52,7 +52,7 @@ app.get("/room/:roomId/songs", async (req, res) => {
     const rawSongs = await redisClient.lRange(`songs:${roomId}`, 0, -1);
     const songs = rawSongs.map((song) => JSON.parse(song));
     res.json({ songs });
-  } catch (error) {
+  } catch (error) {  
     console.error("Could not fetch songs", error);
   }
 });
@@ -79,7 +79,6 @@ wss.on("connection", (ws) => {
       case "chat":
         await redisClient.lPush(`chat:${roomId}`, JSON.stringify(messageData));
         await redisClient.lTrim(`chat:${roomId}`, 0, 99);
-        
         for (const client of clients) {
           if (client.readyState === WebSocket.OPEN) {
             client.send(
@@ -94,7 +93,7 @@ wss.on("connection", (ws) => {
         console.log("messageData:", messageData);
         for (const client of clients) {
           if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({ type: 'addSong', messageData }));
+            client.send(JSON.stringify({ type: "addSong", messageData }));
           }
         }
         break;
@@ -106,5 +105,14 @@ wss.on("connection", (ws) => {
         break;
     }
   });
+  ws.on("close", () => {
+    for (const [roomId, clients] of rooms.entries()) {
+      clients.delete(ws); 
+      if (clients.size === 0) {
+        rooms.delete(roomId);
+      }
+    }
+  });
 });
+
 
