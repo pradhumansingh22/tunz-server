@@ -52,7 +52,7 @@ app.get("/room/:roomId/songs", async (req, res) => {
     const rawSongs = await redisClient.lRange(`songs:${roomId}`, 0, -1);
     const songs = rawSongs.map((song) => JSON.parse(song));
     res.json({ songs });
-  } catch (error) {  
+  } catch (error) {
     console.error("Could not fetch songs", error);
   }
 });
@@ -64,7 +64,7 @@ wss.on("connection", (ws) => {
   ws.on("error", console.error);
   ws.on("message", async (message) => {
     const { type, roomId, messageData } = JSON.parse(message.toString());
-    
+
     console.log("this is the room Id:", roomId);
     const clients = rooms.get(roomId) || new Set();
 
@@ -81,9 +81,7 @@ wss.on("connection", (ws) => {
         await redisClient.lTrim(`chat:${roomId}`, 0, 99);
         for (const client of clients) {
           if (client.readyState === WebSocket.OPEN) {
-            client.send(
-              JSON.stringify({ type: "chat", messageData})
-            );
+            client.send(JSON.stringify({ type: "chat", messageData }));
           }
         }
         break;
@@ -103,16 +101,22 @@ wss.on("connection", (ws) => {
       case "unLikeSong":
         //Handle Unliking the song
         break;
+      case "playPause":
+        console.log("The play pause type :", type);
+        console.log("The song State", messageData);
+        for (const client of clients) {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: "playPause", messageData }));
+          }
+        }
     }
   });
   ws.on("close", () => {
     for (const [roomId, clients] of rooms.entries()) {
-      clients.delete(ws); 
+      clients.delete(ws);
       if (clients.size === 0) {
         rooms.delete(roomId);
       }
     }
   });
 });
-
-
