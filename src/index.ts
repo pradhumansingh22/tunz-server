@@ -101,6 +101,16 @@ wss.on("connection", (ws) => {
       case "unLikeSong":
         //Handle Unliking the song
         break;
+
+      case "playNext":
+        console.log("The play pause type :", type);
+        console.log("The song State", messageData);
+        for (const client of clients) {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: "playNext", messageData }));
+          }
+        }
+
       case "playPause":
         console.log("The play pause type :", type);
         console.log("The song State", messageData);
