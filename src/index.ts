@@ -77,7 +77,7 @@ wss.on("connection", (ws) => {
         break;
 
       case "chat":
-        await redisClient.lPush(`chat:${roomId}`, JSON.stringify(messageData));
+        await redisClient.rPush(`chat:${roomId}`, JSON.stringify(messageData));
         await redisClient.lTrim(`chat:${roomId}`, 0, 99);
         for (const client of clients) {
           if (client.readyState === WebSocket.OPEN) {
@@ -102,21 +102,12 @@ wss.on("connection", (ws) => {
         //Handle Unliking the song
         break;
 
-      case "playNext":
+      case "playNext":  
         console.log("The play pause type :", type);
         console.log("The song State", messageData);
         for (const client of clients) {
           if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify({ type: "playNext", messageData }));
-          }
-        }
-
-      case "playPause":
-        console.log("The play pause type :", type);
-        console.log("The song State", messageData);
-        for (const client of clients) {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({ type: "playPause", messageData }));
           }
         }
     }
