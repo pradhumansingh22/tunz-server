@@ -95,9 +95,11 @@ wss.on("connection", (ws) => {
           }
         }
         break;
+      
       case "likeSong":
         //Handle Upvoting the song
         break;
+      
       case "unLikeSong":
         //Handle Unliking the song
         break;
