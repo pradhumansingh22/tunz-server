@@ -20,5 +20,8 @@
     "express": "^5.1.0",
     "redis": "^4.7.0",
     "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
   }
 }
