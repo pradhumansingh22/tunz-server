@@ -87,7 +87,7 @@ wss.on("connection", (ws) => {
         if (members?.size === 0) {
           rooms.delete(roomId);
           axios
-            .delete(`http://localhost:3000/api/room/?roomId=${roomId}`)
+            .delete(`https://tunz.vercel.app/api/room/?roomId=${roomId}`)
             .then((res) => {
               console.log("Room Deleted");
             });
