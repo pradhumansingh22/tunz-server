@@ -6,7 +6,10 @@ import cors from "cors";
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: [
+      "https://tunz.vercel.app/",
+      "https://tunz-h2ggo6v0k-pradhumansinghs-projects.vercel.app/",
+    ],
     methods: ["GET", "POST"],
   })
 );
