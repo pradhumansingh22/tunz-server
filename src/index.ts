@@ -45,7 +45,6 @@ app.get("/room/:roomId/messages", async (req, res) => {
   }
 });
 
-
 app.get("/room/:roomId/songs", async (req, res) => {
   const { roomId } = req.params;
   if (!roomId) res.send("Could not find Room Id!!!");
@@ -77,6 +76,14 @@ wss.on("connection", (ws) => {
         rooms.get(roomId)?.add(ws);
         break;
 
+      case "exit":
+        const members = rooms.get(roomId);
+        if (members) {
+          clients.delete(ws);
+        }
+        if (members?.size === 0) rooms.delete(roomId);
+        break;
+
       case "chat":
         await redisClient.rPush(`chat:${roomId}`, JSON.stringify(messageData));
         await redisClient.lTrim(`chat:${roomId}`, 0, 99);
@@ -96,16 +103,16 @@ wss.on("connection", (ws) => {
           }
         }
         break;
-      
+
       case "likeSong":
         //Handle Upvoting the song
         break;
-      
+
       case "unLikeSong":
         //Handle Unliking the song
         break;
 
-      case "playNext":  
+      case "playNext":
         console.log("The play pause type :", type);
         console.log("The song State", messageData);
         for (const client of clients) {
