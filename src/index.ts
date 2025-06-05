@@ -9,6 +9,7 @@ app.use(
     origin: [
       "https://tunz.vercel.app",
       "https://tunz-h2ggo6v0k-pradhumansinghs-projects.vercel.app",
+      "http://localhost:3000"
     ],
     methods: ["GET", "POST"],
   })
