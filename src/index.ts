@@ -7,8 +7,7 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://tunz.vercel.app",
-      "https://tunz-h2ggo6v0k-pradhumansinghs-projects.vercel.app",
+      "https://groovehouse.vercel.app",
       "http://localhost:3000"
     ],
     methods: ["GET", "POST"],
