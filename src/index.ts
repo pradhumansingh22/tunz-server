@@ -7,10 +7,7 @@ import axios from "axios";
 const app = express();
 app.use(
   cors({
-    origin: [
-      "https://groovehouse.vercel.app",
-      "http://localhost:3000"
-    ],
+    origin: ["https://groovehouse.vercel.app", "http://localhost:3000"],
     methods: ["GET", "POST"],
   })
 );
@@ -101,6 +98,15 @@ wss.on("connection", (ws) => {
               console.log("Room Deleted");
             });
         }
+        const joinedClients = rooms.get(roomId)!;
+        const usersCount = joinedClients.size;
+
+        for (const client of joinedClients) {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: "join", usersCount }));
+          }
+        }
+
         break;
 
       case "chat":
