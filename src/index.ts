@@ -103,7 +103,7 @@ wss.on("connection", (ws) => {
 
         for (const client of joinedClients) {
           if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({ type: "join", usersCount }));
+            client.send(JSON.stringify({ type: "exit", usersCount }));
           }
         }
 
