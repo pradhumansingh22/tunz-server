@@ -2,6 +2,7 @@ import { createClient } from "redis";
 import WebSocket, { WebSocketServer } from "ws";
 import express from "express";
 import cors from "cors";
+import axios from "axios";
 
 const app = express();
 app.use(
@@ -69,26 +70,34 @@ wss.on("connection", (ws) => {
     const { type, roomId, messageData } = JSON.parse(message.toString());
 
     console.log("this is the room Id:", roomId);
-    const clients = rooms.get(roomId) || new Set();
 
     switch (type) {
       case "join":
         if (!rooms.has(roomId)) {
           rooms.set(roomId, new Set());
         }
-        rooms.get(roomId)?.add(ws);
+        rooms.get(roomId)!.add(ws);
+
+        const joinClients = rooms.get(roomId)!;
+        const users = joinClients.size;
+
+        for (const client of joinClients) {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: "join", users }));
+          }
+        }
         break;
 
       case "exit":
         const members = rooms.get(roomId);
         if (members) {
-          clients.delete(ws);
+          members.delete(ws);
         }
         if (members?.size === 0) {
           rooms.delete(roomId);
           axios
             .delete(`https://tunz.vercel.app/api/room/?roomId=${roomId}`)
-            .then((res) => {
+            .then(() => {
               console.log("Room Deleted");
             });
         }
@@ -97,7 +106,8 @@ wss.on("connection", (ws) => {
       case "chat":
         await redisClient.rPush(`chat:${roomId}`, JSON.stringify(messageData));
         await redisClient.lTrim(`chat:${roomId}`, 0, 99);
-        for (const client of clients) {
+        const chatClients = rooms.get(roomId)!;
+        for (const client of chatClients) {
           if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify({ type: "chat", messageData }));
           }
@@ -106,30 +116,24 @@ wss.on("connection", (ws) => {
 
       case "addSong":
         await redisClient.lPush(`songs:${roomId}`, JSON.stringify(messageData));
-        console.log("messageData:", messageData);
-        for (const client of clients) {
+        const songClients = rooms.get(roomId)!;
+        for (const client of songClients) {
           if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify({ type: "addSong", messageData }));
           }
         }
         break;
 
-      case "likeSong":
-        //Handle Upvoting the song
-        break;
-
-      case "unLikeSong":
-        //Handle Unliking the song
-        break;
-
       case "playNext":
-        console.log("The play pause type :", type);
-        console.log("The song State", messageData);
-        for (const client of clients) {
+        const nextClients = rooms.get(roomId)!;
+        for (const client of nextClients) {
           if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify({ type: "playNext", messageData }));
           }
         }
+        break;
+
+      // TODO: Handle likeSong and unLikeSong
     }
   });
   ws.on("close", () => {
