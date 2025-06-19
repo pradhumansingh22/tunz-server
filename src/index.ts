@@ -98,12 +98,14 @@ wss.on("connection", (ws) => {
               console.log("Room Deleted");
             });
         }
-        const joinedClients = rooms.get(roomId)!;
-        const usersCount = joinedClients.size;
+        const joinedClients = rooms.get(roomId);
+        if (joinedClients) {
+          const usersCount = joinedClients.size;
 
-        for (const client of joinedClients) {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({ type: "exit", usersCount }));
+          for (const client of joinedClients) {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify({ type: "exit", usersCount }));
+            }
           }
         }
 
