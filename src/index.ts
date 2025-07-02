@@ -3,6 +3,8 @@ import WebSocket, { WebSocketServer } from "ws";
 import express from "express";
 import cors from "cors";
 import axios from "axios";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 app.use(
@@ -18,7 +20,7 @@ const server = app.listen(8080, () => {
 const wss = new WebSocketServer({ server });
 
 const redisClient = createClient({
-  url: process.env.REDIS_URL,
+  url: process.env.REDIS_URL
 });
 
 redisClient.on("error", (err) => console.log("Redis Client Error", err));
